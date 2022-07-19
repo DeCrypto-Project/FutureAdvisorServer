@@ -1,0 +1,9 @@
+flask
+flask_restful
+ipinfo
+requests
+docker
+psutil
+apispec
+flask_apispec
+marshmallow
