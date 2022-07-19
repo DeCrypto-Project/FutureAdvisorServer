@@ -11,7 +11,6 @@ from myResponses import ResponseSchemaWeather
 
 
 class Weather(MethodResource, Resource):
-
     def getIpLocation(self):
         access_token = '79501d36df1fb7'
         handler = ipinfo.getHandler(access_token)
