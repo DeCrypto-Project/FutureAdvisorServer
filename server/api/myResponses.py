@@ -13,7 +13,7 @@ class ResponseSchemaDriveStatus(Schema):
 
 
 class SchemaDriveStatusPOST(Schema):
-    mes = fields.Dict()
+    mes = fields.Str()
 
 class ResponseSchemaSystemInfo(Schema):
     Users = fields.Str()

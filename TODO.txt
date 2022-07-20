@@ -1,0 +1,8 @@
+
+
+1. convert the mercouvich and jini algo in the python code
+2. create 2 end-point for each algo
+3. architecture of the code - db?, objects etc
+4. refresher
+
+DF AS THE BASE OBJECT

@@ -42,6 +42,7 @@ class Weather(MethodResource, Resource):
     # get /checkCurrentWeather
     @marshal_with(ResponseSchemaWeather)  # marshalling with marshmallow library
     def get(self):
+        buildDictionary()
         teachers = ["2","3", "4"]
         return jsonify(teachers)
 
