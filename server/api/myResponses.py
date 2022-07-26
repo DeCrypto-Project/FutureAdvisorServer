@@ -2,9 +2,7 @@ from marshmallow import Schema, fields
 
 
 class ResponseSchemaWeather(Schema):
-    city = fields.Str()
-    country = fields.Str()
-    degrees = fields.Str()
+    pass
 
 
 class ResponseSchemaDriveStatus(Schema):

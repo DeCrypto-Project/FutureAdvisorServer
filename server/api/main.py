@@ -3,6 +3,7 @@ from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 from flask import Flask
 from flask_cors import CORS
+from flask_apispec import FlaskApiSpec
 
 # from server.api.MyAuthorization import Auth
 # from server.api.portfolioApi import PortfolioApi
@@ -25,14 +26,13 @@ app.config.update({
     'APISPEC_SWAGGER_UI_URL': '/swagger-ui/'  # URI to access UI of API Doc
 })
 
-api.add_resource(Auth, '/v1/api/auth')
-api.add_resource(Weather, '/v1/api/checkCurrentWeather')
-api.add_resource(PortfolioApi, '/v1/api/driveStatus')
-# docs = FlaskApiSpec(app)
-# docs.register(Weather)
-# docs.register(PortfolioApi)
-# docs.register(Auth)
-
+#api.add_resource(Auth, '/v1/api/auth')
+api.add_resource(Weather, '/')
+#api.add_resource(PortfolioApi, '/v1/api/driveStatus')
+docs = FlaskApiSpec(app)
+docs.register(Weather)
+#docs.register(PortfolioApi)
+#docs.register(Auth)
 
 @app.after_request
 def add_headers(response):
