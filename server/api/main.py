@@ -4,6 +4,7 @@ from apispec.ext.marshmallow import MarshmallowPlugin
 from flask import Flask
 from flask_apispec import FlaskApiSpec
 from flask_cors import CORS
+from flask_apispec import FlaskApiSpec
 
 from server.api.portfolioApi import DriveStatus
 from server.api.wheather import Weather
@@ -27,11 +28,14 @@ app.config.update({
 })
 
 
-api.add_resource(Weather, '/v1/api/checkCurrentWeather')
-api.add_resource(DriveStatus, '/v1/api/driveStatus')
+#api.add_resource(Auth, '/v1/api/auth')
+api.add_resource(Weather, '/')
+#api.add_resource(PortfolioApi, '/v1/api/driveStatus')
 docs = FlaskApiSpec(app)
 docs.register(Weather)
-docs.register(DriveStatus)
+#docs.register(PortfolioApi)
+#docs.register(Auth)
+
 
 @app.after_request
 def add_headers(response):
