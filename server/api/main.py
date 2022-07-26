@@ -2,11 +2,11 @@ import flask_restful
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 from flask import Flask
+from flask_apispec import FlaskApiSpec
 from flask_cors import CORS
 from flask_apispec import FlaskApiSpec
 
-# from server.api.MyAuthorization import Auth
-# from server.api.portfolioApi import PortfolioApi
+from server.api.portfolioApi import DriveStatus
 from server.api.wheather import Weather
 
 app = Flask(__name__)
@@ -16,15 +16,17 @@ app.config['PROPAGATE_EXCEPTIONS'] = True  # To allow flask propagating exceptio
 api = flask_restful.Api(app)
 app.config.update({
     'APISPEC_SPEC': APISpec(
-        title='BootCamp Ex01 Project',
+        title='futre ',
         version='v1',
         plugins=[MarshmallowPlugin()],
-        openapi_version='2.0.0'
+        openapi_version='2.0.0',
+
 
     ),
     'APISPEC_SWAGGER_URL': '/swagger/',  # URI to access API Doc JSON
     'APISPEC_SWAGGER_UI_URL': '/swagger-ui/'  # URI to access UI of API Doc
 })
+
 
 #api.add_resource(Auth, '/v1/api/auth')
 api.add_resource(Weather, '/')
@@ -34,6 +36,7 @@ docs.register(Weather)
 #docs.register(PortfolioApi)
 #docs.register(Auth)
 
+
 @app.after_request
 def add_headers(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
@@ -41,6 +44,7 @@ def add_headers(response):
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     response.headers.add('Access-Control-Expose-Headers', 'Content-Type,Content-Length,Authorization,X-Pagination')
     return response
+
 
 
 if __name__ == '__main__':

@@ -5,7 +5,9 @@ requests
 docker
 psutil
 apispec
+
 flask_apispec==0.11.0
+
 marshmallow
 matplotlib==3.3.0
 yfinance
