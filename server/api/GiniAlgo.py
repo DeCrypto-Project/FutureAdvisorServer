@@ -9,7 +9,7 @@ plt.switch_backend('Agg')
 import pandas as pd
 from flask import send_file
 
-class Weather(MethodResource, Resource):
+class GiniAlgo(MethodResource, Resource):
 
     num_portfolios = 500
     selected = []
@@ -102,7 +102,7 @@ class Weather(MethodResource, Resource):
         plt.savefig('static/cover1.png')
         return ("Saved")
 
-    # get /checkCurrentWeather
+    # get /gini
     @marshal_with(ResponseSchemaWeather)  # marshalling with marshmallow library
     def get(self):
 

@@ -7,7 +7,7 @@ from flask_cors import CORS
 from flask_apispec import FlaskApiSpec
 
 from server.api.portfolioApi import DriveStatus
-from server.api.wheather import Weather
+from server.api.GiniAlgo import GiniAlgo
 
 app = Flask(__name__)
 CORS(app)
@@ -29,10 +29,10 @@ app.config.update({
 
 
 #api.add_resource(Auth, '/v1/api/auth')
-api.add_resource(Weather, '/')
+api.add_resource(GiniAlgo, '/')
 #api.add_resource(PortfolioApi, '/v1/api/driveStatus')
 docs = FlaskApiSpec(app)
-docs.register(Weather)
+docs.register(GiniAlgo)
 #docs.register(PortfolioApi)
 #docs.register(Auth)
 
