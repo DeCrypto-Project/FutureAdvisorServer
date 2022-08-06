@@ -4,9 +4,6 @@ run: ## run the app
 test:  ## run tests locally
 	pytest
 
-test_ci:  ## run tests in a docker container. Meant for use on CI
-	docker-compose run --rm app pytest
-
 build_docker_local:  ## build docker image locally for testing
 	docker build --build-arg SERVICE_NAME=PyBootcampCondaOmar-chaim . -t pybootcampcondaomar-chaim
 
