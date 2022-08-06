@@ -5,7 +5,7 @@ test:  ## run tests locally
 	pytest
 
 build_docker_local:  ## build docker image locally for testing
-	docker build --build-arg SERVICE_NAME=PyBootcampCondaOmar-chaim . -t pybootcampcondaomar-chaim
+	docker build --build-arg SERVICE_NAME=FutureAdvisorServer . -t future_advisor_server
 
 refresh_requirements:  ## compile requirements from requirements.in to requirements.txt
 	pip-compile -v --no-annotate requirements.in
