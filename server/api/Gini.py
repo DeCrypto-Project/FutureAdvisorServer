@@ -7,7 +7,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 plt.switch_backend('Agg')
 import pandas as pd
-from flask import send_file
+from flask import send_file, jsonify
+
 
 class Gini(MethodResource, Resource):
     #
@@ -106,8 +107,9 @@ class Gini(MethodResource, Resource):
     @marshal_with(ResponseSchema)  # marshalling with marshmallow library
     def get(self):
 
-        output = self.start(select=['QQQ','LQD','IEI','SPY'], start_year="2020-1-1", end_year="2020-2-2", num_portfolios1=500)
-        return send_file('cover1.png', mimetype='image/gif')
+        # output = self.start(select=['QQQ','LQD','IEI','SPY'], start_year="2020-1-1", end_year="2020-2-2", num_portfolios1=500)
+        # return send_file('cover1.png', mimetype='image/gif')
+        return jsonify("hello world")
 
 
 

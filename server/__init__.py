@@ -27,7 +27,7 @@ app.config.update({
     'APISPEC_SWAGGER_UI_URL': '/swagger-ui/'  # URI to access UI of API Doc
 })
 cache = redis.Redis(host='redis', port=6379)
-api.add_resource(Gini, '/')
+api.add_resource(Gini, '/Gini')
 docs = FlaskApiSpec(app)
 docs.register(Gini)
 
