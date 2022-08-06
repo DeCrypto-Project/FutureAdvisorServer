@@ -1,8 +1,0 @@
-[all]:
-    mysetting: "PyBootcampConda"
-  
-[prod]:
-    mysetting: "PyBootcampConda"
-  
-[test]:
-    mysetting: "PyBootcampConda"

@@ -1,6 +1,8 @@
-version: "3.3"
+version: "3.9"
 services:
-  app:
-    image: ${image_base_tag:-futureadvisor}
+  web:
+    build: ..
     ports:
-      - "8080"
+      - "8080:5050"
+  redis:
+    image: "redis:alpine"
