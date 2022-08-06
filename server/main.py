@@ -1,4 +1,4 @@
-from app.factory import create_app
+from server.app import create_app
 
 
 def main():
