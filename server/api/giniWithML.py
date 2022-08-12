@@ -6,10 +6,11 @@ import matplotlib.pyplot as plt
 
 from server.dto.responseApi import ResponseApi
 
-plt.switch_backend('Agg')
+#plt.switch_backend('Agg')
 import yfinance as yf
 import math
 import numpy as np
+import pandas as pd
 import datetime
 from sklearn import preprocessing, svm
 from sklearn.model_selection import train_test_split
@@ -19,12 +20,8 @@ from pandas_datareader import data as pdr
 
 class GiniWithML(MethodResource, Resource):
 
-
-    def gini(self, volatile):
+    def gini(self, selected,volatile, start_year, end_year):
         # Select stocks, start year and end year, stock number has no known limit
-        selected = ["SPY", "IEI", "LQD", "QQQ"]
-        start_year = '2019-09-30'
-        end_year = '2022-07-12'
         Num_porSimulation = 100
         V = volatile
 
@@ -33,10 +30,10 @@ class GiniWithML(MethodResource, Resource):
         frame = {}
         for stock in selected:
             data_var = pdr.get_data_yahoo(stock, start_year, end_year)['Adj Close']
+            #data_var = yf.download(stock, start_year, end_year)['Adj Close']
             data_var.to_frame()
             frame.update({stock: data_var})
 
-        import pandas as pd
         # Mathematical calculations, creation of 5000 portfolios,
         table = pd.DataFrame(frame)
         # pd.DataFrame(frame).to_csv('Out.csv')
@@ -106,59 +103,114 @@ class GiniWithML(MethodResource, Resource):
         df = df[column_order]
         self.plot(df, selected)
 
-        def analyzeMechainLearningFunc(self, profolio_return, table_index):
-            df_final = pd.DataFrame({})
-            forecast_col = 'col'
-            df_final[forecast_col] = profolio_return
-            # forecast_col= 'ADJ_PCT_change_SPY'
-            df_final.fillna(value=-0, inplace=True)
-            forecast_out = int(math.ceil(0.01 * len(df_final)))
-            df_final['label'] = df_final[forecast_col].shift(-forecast_out)
-            # print(df_final.head())
-            # df_final.to_csv('Out.csv')
+    def plot(self, df, selected):
+        # plot frontier, max sharpe & min Gini values with a scatterplot
+        # find min Gini & max sharpe values in the dataframe (df)
+        min_gini = df['Gini'].min()
+        max_sharpe = df['Sharpe Ratio'].max()
+        max_profolio_annual = df['Profolio_annual'].max()
+        max_gini = df['Gini'].max()
 
-            # Added date
-            df = df_final
-            df['Date'] = table_index
-            # print(df)
-            X = np.array(df.drop(['label', 'Date'], 1))
-            X = preprocessing.scale(X)
-            X_lately = X[-forecast_out:]
-            X = X[:-forecast_out]
-            df.dropna(inplace=True)
+        # use the min, max values to locate and create the two special portfolios
+        sharpe_portfolio = df.loc[df['Sharpe Ratio'] == max_sharpe]
+        min_variance_port = df.loc[df['Gini'] == min_gini]
+        max_profolios_annual = df.loc[df['Profolio_annual'] == max_profolio_annual]
+        max_ginis = df.loc[df['Gini'] == max_gini]
 
-            y = np.array(df['label'])
+        # plot frontier, max sharpe & min Gini values with a scatterplot
+        plt.style.use('seaborn-dark')
+        df.plot.scatter(x='Gini', y='Profolio_annual', c='Sharpe Ratio',
+                        cmap='RdYlGn', edgecolors='black', figsize=(10, 8), grid=True)
+        plt.scatter(x=sharpe_portfolio['Gini'], y=sharpe_portfolio['Profolio_annual'], c='green', marker='D', s=200)
+        plt.scatter(x=min_variance_port['Gini'], y=min_variance_port['Profolio_annual'], c='orange', marker='D', s=200)
+        plt.scatter(x=max_ginis['Gini'], y=max_profolios_annual['Profolio_annual'], c='red', marker='D', s=200)
+        plt.style.use('seaborn-dark')
 
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)
-            clf = LinearRegression()
-            clf.fit(X_train, y_train)
-            confidence = clf.score(X_test, y_test)
-            print(confidence)
-            forecast_set = clf.predict(X_lately)
-            df['Forecast'] = np.nan
+        plt.xlabel('Gini (Std. Deviation) Percentage %')
+        plt.ylabel('Expected profolio annual Percentage %')
+        plt.title('Efficient Frontier')
+        plt.subplots_adjust(bottom=0.4)
 
-            last_date = df.iloc[-1]['Date']
-            last_unix = last_date.timestamp()
-            one_day = 86400
-            next_unix = last_unix + one_day
+        # ------------------ Pritning 3 optimal Protfolios -----------------------
+        # Setting max_X, max_Y to act as relative border for window size
 
-            for i in forecast_set:
-                next_date = datetime.datetime.fromtimestamp(next_unix)
-                next_unix += 86400
-                df.loc[next_date] = [np.nan for _ in range(len(df.columns) - 1)] + [i]
+        red_num = df.index[df["Profolio_annual"] == max_profolio_annual]
+        yellow_num = df.index[df['Gini'] == min_gini]
+        green_num = df.index[df['Sharpe Ratio'] == max_sharpe]
+        multseries = pd.Series([1, 1, 1] + [100 for stock in selected],
+                               index=['Profolio_annual', 'Gini', 'Sharpe Ratio'] + [stock + ' Weight' for stock in
+                                                                                    selected])
+        with pd.option_context('display.float_format', '%{:,.2f}'.format):
+            plt.figtext(0.2, 0.15,
+                        "Max Profolio_annual Porfolio: \n" + df.loc[red_num[0]].multiply(multseries).to_string(),
+                        bbox=dict(facecolor='red', alpha=0.5), fontsize=11, style='oblique', ha='center', va='center',
+                        wrap=True)
+            plt.figtext(0.45, 0.15, "Safest Portfolio: \n" + df.loc[yellow_num[0]].multiply(multseries).to_string(),
+                        bbox=dict(facecolor='yellow', alpha=0.5), fontsize=11, style='oblique', ha='center',
+                        va='center', wrap=True)
+            plt.figtext(0.7, 0.15, "Sharpe  Portfolio: \n" + df.loc[green_num[0]].multiply(multseries).to_string(),
+                        bbox=dict(facecolor='green', alpha=0.5), fontsize=11, style='oblique', ha='center', va='center',
+                        wrap=True)
+        plt.savefig("plot_gini_with_ml.png")
 
-            df['Forecast'].plot()
-            # df['Forecast'].to_csv('Out-f.csv')
+    def analyzeMechainLearningFunc(self, profolio_return, table_index):
+        df_final = pd.DataFrame({})
+        forecast_col = 'col'
+        df_final[forecast_col] = profolio_return
+        # forecast_col= 'ADJ_PCT_change_SPY'
+        df_final.fillna(value=-0, inplace=True)
+        forecast_out = int(math.ceil(0.01 * len(df_final)))
+        df_final['label'] = df_final[forecast_col].shift(-forecast_out)
+        # print(df_final.head())
+        # df_final.to_csv('Out.csv')
 
-            ans = (((1 + df['Forecast'].mean()) ** 254) - 1) * 100
-            print(ans)
-            return ans
+        # Added date
+        df = df_final
+        df['Date'] = table_index
+        # print(df)
+        X = np.array(df.drop(['label', 'Date'], 1))
+        X = preprocessing.scale(X)
+        X_lately = X[-forecast_out:]
+        X = X[:-forecast_out]
+        df.dropna(inplace=True)
+
+        y = np.array(df['label'])
+
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)
+        clf = LinearRegression()
+        clf.fit(X_train, y_train)
+        confidence = clf.score(X_test, y_test)
+        print(confidence)
+        forecast_set = clf.predict(X_lately)
+        df['Forecast'] = np.nan
+
+        last_date = df.iloc[-1]['Date']
+        last_unix = last_date.timestamp()
+        one_day = 86400
+        next_unix = last_unix + one_day
+
+        for i in forecast_set:
+            next_date = datetime.datetime.fromtimestamp(next_unix)
+            next_unix += 86400
+            df.loc[next_date] = [np.nan for _ in range(len(df.columns) - 1)] + [i]
+
+        df['Forecast'].plot()
+        # df['Forecast'].to_csv('Out-f.csv')
+
+        ans = (((1 + df['Forecast'].mean()) ** 254) - 1) * 100
+        print(ans)
+        return ans
 
     @marshal_with(InputSchema)  # marshalling with marshmallow library
     @use_kwargs(InputSchema, location=('query'))
     def get(self, amountToInvest, riskScore):
         volatilityPercentage = 40
-        stokes = [{'BTC': 10000}, {'ETH': 10000}, {'XRP': 10000}, {'LTC': 10000}, {'BCH': 10000}, {'EOS': 10000}]
-        response = ResponseApi("GiniWithML", volatilityPercentage, stokes, amountToInvest, datetime.datetime.now())
+        #stocks = [{'BTC': 10000}, {'ETH': 10000}, {'XRP': 10000}, {'LTC': 10000}, {'BCH': 10000}, {'EOS': 10000}]
+        #stocks = ["SPY","IEI","LQD","QQQ"]
+        stocks = ["BTC-USD","ETH-USD", "ADA-USD"]
+        start_date = '2019-01-01'
+        end_date = '2019-01-10'
+        gini_res = self.gini(stocks, volatilityPercentage, start_date, end_date)
+        response = ResponseApi("GiniWithML", volatilityPercentage, stocks, amountToInvest, datetime.datetime.now())
         return jsonify(response.__str__())
         # return jsonify()
