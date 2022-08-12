@@ -1,6 +1,6 @@
 from flask_apispec import MethodResource, marshal_with
 from flask_restful import Resource
-from server.api.myResponses import ResponseSchema
+from server.api.myResponses import InputSchema
 import matplotlib.pyplot as plt
 plt.switch_backend('Agg')
 import pandas as pd
@@ -52,7 +52,7 @@ class Gini(MethodResource, Resource):
         return sharpe_portfolio
 
     # get /checkCurrentWeather
-    @marshal_with(ResponseSchema)  # marshalling with marshmallow library
+    @marshal_with(InputSchema)  # marshalling with marshmallow library
     def get(self):
         # output = self.start(select=['QQQ','LQD','IEI','SPY'], start_year="2020-1-1", end_year="2020-2-2", num_portfolios1=500)
         # return send_file('cover1.png', mimetype='image/gif')

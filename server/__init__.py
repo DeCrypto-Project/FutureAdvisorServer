@@ -7,6 +7,7 @@ from flask_apispec import FlaskApiSpec
 from flask_cors import CORS
 
 from server.api.gini import Gini
+from server.api.giniWithML import GiniWithML
 
 app = Flask(__name__)
 CORS(app)
@@ -27,8 +28,10 @@ app.config.update({
 })
 cache = redis.Redis(host='redis', port=6379)
 api.add_resource(Gini, '/Gini')
+api.add_resource(GiniWithML, '/GiniWithML')
 docs = FlaskApiSpec(app)
 docs.register(Gini)
+docs.register(GiniWithML)
 
 
 @app.after_request

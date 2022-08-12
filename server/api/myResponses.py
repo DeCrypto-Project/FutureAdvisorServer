@@ -1,6 +1,7 @@
 from marshmallow import Schema, fields
 
 
-class ResponseSchema(Schema):
-    volatile = fields.Str()
+class InputSchema(Schema):
+    riskScore = fields.Int()
+    amountToInvest = fields.Float()
     pass
