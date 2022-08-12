@@ -8,6 +8,8 @@ from flask_cors import CORS
 
 from server.api.gini import Gini
 from server.api.giniWithML import GiniWithML
+from server.api.markowitz import Markowitz
+from server.api.twitter_stocks import TwitterStocks
 
 app = Flask(__name__)
 CORS(app)
@@ -29,9 +31,13 @@ app.config.update({
 cache = redis.Redis(host='redis', port=6379)
 api.add_resource(Gini, '/Gini')
 api.add_resource(GiniWithML, '/GiniWithML')
+api.add_resource(Markowitz, '/Markowitz')
+api.add_resource(TwitterStocks, '/TwitterStocks')
 docs = FlaskApiSpec(app)
 docs.register(Gini)
 docs.register(GiniWithML)
+docs.register(Markowitz)
+docs.register(TwitterStocks)
 
 
 @app.after_request
