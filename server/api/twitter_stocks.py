@@ -1,6 +1,6 @@
 from flask_apispec import marshal_with
 
-from server.api.myResponses import ResponseSchema
+from server.api.myResponses import InputSchema
 from server.api.resources.twitter_stokes import run_stock
 
 
@@ -158,7 +158,7 @@ today = str(today)
 
 
 # get /checkCurrentWeather
-@marshal_with(ResponseSchema)  # marshalling with marshmallow library
+@marshal_with(InputSchema)  # marshalling with marshmallow library
 def get(stock_symbol, start_date=two_week_ago, end_date=today):
     try:
         return gen_sent_graph(stock_symbol, start_date, end_date)
