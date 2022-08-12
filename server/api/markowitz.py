@@ -3,19 +3,9 @@ from flask_restful import Resource
 from server.api.myResponses import ResponseSchema
 import matplotlib.pyplot as plt
 plt.switch_backend('Agg')
-import matplotlib.pyplot as plt
-import yfinance as yf
-import quandl, math
 import pandas as pd
 import numpy as np
-import datetime
-from sklearn import preprocessing, svm
-from sklearn.model_selection import cross_val_score,cross_val_predict
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from pandas_datareader import data as pdr
-from matplotlib import style
-from functools import reduce
+
 
 class Gini(MethodResource, Resource):
     def get_optimal_portfolio(self):
