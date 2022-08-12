@@ -212,10 +212,9 @@ class Gini(MethodResource, Resource):
 
     # get /
     @marshal_with(ResponseSchema)  # marshalling with marshmallow library
-    @use_kwargs({"volatile": fields.Integer()}, location="query")
-    def get(self, **kwargs):
-        # volatile = request.args.get('volatile')
+    @use_kwargs(ResponseSchema, location=('query'))
+    def get(self, volatile):
         # output = self.start(select=['QQQ','LQD','IEI','SPY'], start_year="2020-1-1", end_year="2020-2-2", num_portfolios1=500)
         # return send_file('cover1.png', mimetype='image/gif')
-        return jsonify("hello world")
+        return jsonify(volatile)
         # return self.gini(volatile)
