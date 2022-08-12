@@ -17,13 +17,15 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from pandas_datareader import data as pdr
 
+from util.choosePortfolioByRiskScore import choosePortfolioByRiskScore
+
 
 class GiniWithML(MethodResource, Resource):
 
-    def gini(self, selected,volatile, start_year, end_year):
+    def gini(self, selected, start_year, end_year):
         # Select stocks, start year and end year, stock number has no known limit
         Num_porSimulation = 100
-        V = volatile
+        V = 1.5
 
         # Building the dataframe
         yf.pdr_override()
@@ -101,7 +103,7 @@ class GiniWithML(MethodResource, Resource):
 
         # reorder dataframe columns
         df = df[column_order]
-        self.plot(df, selected)
+        return df
 
     def plot(self, df, selected):
         # plot frontier, max sharpe & min Gini values with a scatterplot
@@ -140,9 +142,10 @@ class GiniWithML(MethodResource, Resource):
         multseries = pd.Series([1, 1, 1] + [100 for stock in selected],
                                index=['Profolio_annual', 'Gini', 'Sharpe Ratio'] + [stock + ' Weight' for stock in
                                                                                     selected])
+
         with pd.option_context('display.float_format', '%{:,.2f}'.format):
             plt.figtext(0.2, 0.15,
-                        "Max Profolio_annual Porfolio: \n" + df.loc[red_num[0]].multiply(multseries).to_string(),
+                        "Max Porfolio: \n" + df.loc[red_num[0]].multiply(multseries).to_string(),
                         bbox=dict(facecolor='red', alpha=0.5), fontsize=11, style='oblique', ha='center', va='center',
                         wrap=True)
             plt.figtext(0.45, 0.15, "Safest Portfolio: \n" + df.loc[yellow_num[0]].multiply(multseries).to_string(),
@@ -151,7 +154,14 @@ class GiniWithML(MethodResource, Resource):
             plt.figtext(0.7, 0.15, "Sharpe  Portfolio: \n" + df.loc[green_num[0]].multiply(multseries).to_string(),
                         bbox=dict(facecolor='green', alpha=0.5), fontsize=11, style='oblique', ha='center', va='center',
                         wrap=True)
+
         plt.savefig("plot_gini_with_ml.png")
+        return self.buildReturnDic(selected, max_profolios_annual, min_variance_port, sharpe_portfolio)
+
+        # max_portfolio = df.loc[red_num[0]].multiply(multseries)
+        # safe_portfolio = df.loc[yellow_num[0]].multiply(multseries)
+        # sharpe_portfolio = df.loc[green_num[0]].multiply(multseries)
+        #self.build_response(max_portfolio, safe_portfolio, sharpe_portfolio)
 
     def analyzeMechainLearningFunc(self, profolio_return, table_index):
         df_final = pd.DataFrame({})
@@ -201,16 +211,36 @@ class GiniWithML(MethodResource, Resource):
         print(ans)
         return ans
 
+    def buildReturnDic(sel, amountToInvest, selected, df):
+        returnDic = {'Max Risk Porfolio': {}, 'Safest Portfolio': {}, 'Sharpe Portfolio': {}}
+        min_gini = df['Gini'].min()
+        max_sharpe = df['Sharpe Ratio'].max()
+        max_profolio_annual = df['Profolio_annual'].max()
+
+        # use the min, max values to locate and create the two special portfolios
+        sharpe_portfolio = df.loc[df['Sharpe Ratio'] == max_sharpe]
+        safe_portfolio = df.loc[df['Gini'] == min_gini]
+        max_portfolio = df.loc[df['Profolio_annual'] == max_profolio_annual]
+
+
+        # returnDic['Max Risk Porfolio']['Profolio_annual'] = max_portfolio['Profolio_annual'].values[0]
+        # returnDic['Safest Portfolio']['Profolio_annual'] = safe_portfolio['Profolio_annual'].values[0]
+        # returnDic['Sharpe Portfolio']['Profolio_annual'] = sharpe_portfolio['Profolio_annual'].values[0]
+        for stock in selected:
+            returnDic['Max Risk Porfolio'][stock] = max_portfolio[stock + ' Weight'].values[0] * amountToInvest
+            returnDic['Safest Portfolio'][stock] = safe_portfolio[stock+' Weight'].values[0]* amountToInvest
+            returnDic['Sharpe Portfolio'][stock] = sharpe_portfolio[stock+' Weight'].values[0]* amountToInvest
+        return returnDic
+
+
     @marshal_with(InputSchema)  # marshalling with marshmallow library
     @use_kwargs(InputSchema, location=('query'))
     def get(self, amountToInvest, riskScore):
-        volatilityPercentage = 40
-        #stocks = [{'BTC': 10000}, {'ETH': 10000}, {'XRP': 10000}, {'LTC': 10000}, {'BCH': 10000}, {'EOS': 10000}]
-        #stocks = ["SPY","IEI","LQD","QQQ"]
         stocks = ["BTC-USD","ETH-USD", "ADA-USD"]
-        start_date = '2019-01-01'
-        end_date = '2019-01-10'
-        gini_res = self.gini(stocks, volatilityPercentage, start_date, end_date)
-        response = ResponseApi("GiniWithML", volatilityPercentage, stocks, amountToInvest, datetime.datetime.now())
+        start_date = '2020-01-01'
+        end_date = '2022-08-10'
+        gini_df = self.gini(stocks, start_date, end_date)
+        PortfoliosDic = self.buildReturnDic(amountToInvest, stocks, gini_df )
+        final_invest_portfolio = choosePortfolioByRiskScore(PortfoliosDic, riskScore)
+        response = ResponseApi("GiniWithML",final_invest_portfolio, amountToInvest, datetime.datetime.now())
         return jsonify(response.__str__())
-        # return jsonify()
