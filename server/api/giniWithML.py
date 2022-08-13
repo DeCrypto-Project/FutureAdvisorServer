@@ -4,7 +4,7 @@ from flask_restful import Resource
 from server.api.myResponses import InputSchema
 import matplotlib.pyplot as plt
 
-from server.api.util.apiUtil import choosePortfolioByRiskScore, buildReturnGiniPortfoliosDic
+from server.util.apiUtil import choosePortfolioByRiskScore, buildReturnGiniPortfoliosDic
 from server.dto.responseApi import ResponseApi
 
 #plt.switch_backend('Agg')
@@ -13,7 +13,7 @@ import math
 import numpy as np
 import pandas as pd
 import datetime
-from sklearn import preprocessing, svm
+from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from pandas_datareader import data as pdr

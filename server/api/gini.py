@@ -1,17 +1,16 @@
 import datetime
 
-from flask import request, jsonify
+from flask import jsonify
 from flask_apispec import MethodResource, marshal_with, use_kwargs
-from flask_restful import Resource, fields, reqparse
+from flask_restful import Resource
 
-from server.api.myResponses import InputSchemaTwitter, InputSchema
+from server.api.myResponses import InputSchema
 import matplotlib.pyplot as plt
 
-from server.api.util.apiUtil import choosePortfolioByRiskScore, buildReturnGiniPortfoliosDic
+from server.util.apiUtil import choosePortfolioByRiskScore, buildReturnGiniPortfoliosDic
 from server.dto.responseApi import ResponseApi
 
 plt.switch_backend('Agg')
-import matplotlib.pyplot as plt
 import yfinance as yf
 import pandas as pd
 import numpy as np

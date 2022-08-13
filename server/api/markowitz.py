@@ -1,22 +1,13 @@
-import datetime
-
 from flask import jsonify
 from flask_apispec import MethodResource, marshal_with, use_kwargs
 from flask_restful import Resource
 from server.api.myResponses import InputSchema
-from server.api.util.apiUtil import choosePortfolioByRiskScore,buildReturnMarkowitzPortfoliosDic
+from server.util.apiUtil import choosePortfolioByRiskScore,buildReturnMarkowitzPortfoliosDic
 from server.dto.responseApi import ResponseApi
-import numpy as np
-import pandas as pd
-import datetime
 import yfinance as yf
-import math
 import numpy as np
 import pandas as pd
 import datetime
-from sklearn import preprocessing, svm
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
 from pandas_datareader import data as pdr
 
 
