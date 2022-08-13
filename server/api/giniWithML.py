@@ -4,6 +4,7 @@ from flask_restful import Resource
 from server.api.myResponses import InputSchema
 import matplotlib.pyplot as plt
 
+from server.api.util.apiUtil import choosePortfolioByRiskScore, buildReturnGiniPortfoliosDic
 from server.dto.responseApi import ResponseApi
 
 #plt.switch_backend('Agg')
@@ -17,14 +18,13 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from pandas_datareader import data as pdr
 
-from util.choosePortfolioByRiskScore import choosePortfolioByRiskScore
 
 
 class GiniWithML(MethodResource, Resource):
 
     def gini(self, selected, start_year, end_year):
         # Select stocks, start year and end year, stock number has no known limit
-        Num_porSimulation = 100
+        Num_porSimulation = 500
         V = 1.5
 
         # Building the dataframe
@@ -211,26 +211,7 @@ class GiniWithML(MethodResource, Resource):
         print(ans)
         return ans
 
-    def buildReturnDic(sel, amountToInvest, selected, df):
-        returnDic = {'Max Risk Porfolio': {}, 'Safest Portfolio': {}, 'Sharpe Portfolio': {}}
-        min_gini = df['Gini'].min()
-        max_sharpe = df['Sharpe Ratio'].max()
-        max_profolio_annual = df['Profolio_annual'].max()
 
-        # use the min, max values to locate and create the two special portfolios
-        sharpe_portfolio = df.loc[df['Sharpe Ratio'] == max_sharpe]
-        safe_portfolio = df.loc[df['Gini'] == min_gini]
-        max_portfolio = df.loc[df['Profolio_annual'] == max_profolio_annual]
-
-
-        # returnDic['Max Risk Porfolio']['Profolio_annual'] = max_portfolio['Profolio_annual'].values[0]
-        # returnDic['Safest Portfolio']['Profolio_annual'] = safe_portfolio['Profolio_annual'].values[0]
-        # returnDic['Sharpe Portfolio']['Profolio_annual'] = sharpe_portfolio['Profolio_annual'].values[0]
-        for stock in selected:
-            returnDic['Max Risk Porfolio'][stock] = max_portfolio[stock + ' Weight'].values[0] * amountToInvest
-            returnDic['Safest Portfolio'][stock] = safe_portfolio[stock+' Weight'].values[0]* amountToInvest
-            returnDic['Sharpe Portfolio'][stock] = sharpe_portfolio[stock+' Weight'].values[0]* amountToInvest
-        return returnDic
 
 
     @marshal_with(InputSchema)  # marshalling with marshmallow library
@@ -240,7 +221,7 @@ class GiniWithML(MethodResource, Resource):
         start_date = '2020-01-01'
         end_date = '2022-08-10'
         gini_df = self.gini(stocks, start_date, end_date)
-        PortfoliosDic = self.buildReturnDic(amountToInvest, stocks, gini_df )
+        PortfoliosDic = buildReturnGiniPortfoliosDic(amountToInvest, stocks, gini_df)
         final_invest_portfolio = choosePortfolioByRiskScore(PortfoliosDic, riskScore)
         response = ResponseApi("GiniWithML",final_invest_portfolio, amountToInvest, datetime.datetime.now())
         return jsonify(response.__str__())

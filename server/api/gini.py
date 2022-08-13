@@ -7,6 +7,7 @@ from flask_restful import Resource, fields, reqparse
 from server.api.myResponses import InputSchemaTwitter, InputSchema
 import matplotlib.pyplot as plt
 
+from server.api.util.apiUtil import choosePortfolioByRiskScore, buildReturnGiniPortfoliosDic
 from server.dto.responseApi import ResponseApi
 
 plt.switch_backend('Agg')
@@ -19,13 +20,13 @@ from pandas_datareader import data as pdr
 
 class Gini(MethodResource, Resource):
 
-    def gini(self, volatile):
+    def gini(self, selected, start_date, end_date):
         # Select stocks, start year and end year, stock number has no known limit
-        selected = ["SPY", "IEI", "LQD", "QQQ"]
-        start_year = '2019-09-30'
-        end_year = '2022-07-12'
-        Num_porSimulation = 100
-        V = volatile
+        selected = selected
+        start_year = start_date
+        end_year = end_date
+        Num_porSimulation = 500
+        V = 1.5
 
         # Building the dataframe
         yf.pdr_override()
@@ -35,7 +36,6 @@ class Gini(MethodResource, Resource):
             data_var.to_frame()
             frame.update({stock: data_var})
 
-        import pandas as pd
         # Mathematical calculations, creation of 5000 portfolios,
         table = pd.DataFrame(frame)
         # pd.DataFrame(frame).to_csv('Out.csv')
@@ -89,18 +89,29 @@ class Gini(MethodResource, Resource):
                      'Gini': port_gini_annual,
                      'Sharpe Ratio': sharpe_ratio}
 
+        # extend original dictionary to accomodate each ticker and weight in the portfolio
+        for counter, symbol in enumerate(selected):
+            portfolio[symbol + ' Weight'] = [Weight[counter] for Weight in stock_weights]
+
         # make a nice dataframe of the extended dictionary
         df = pd.DataFrame(portfolio)
-        self.plot(df, selected)
-        # get better labels for desired arrangement of columns
 
+        # get better labels for desired arrangement of columns
+        column_order = ['Profolio_annual', 'Gini', 'Sharpe Ratio'] + [stock + ' Weight' for stock in selected]
+
+        # reorder dataframe columns
+        df = df[column_order]
+        return df
 
     @marshal_with(InputSchema)  # marshalling with marshmallow library
     @use_kwargs(InputSchema, location=('query'))
     def get(self, amountToInvest, riskScore):
-        volatilityPercentage = 40
-        self.gini(volatilityPercentage)
-        stokes = [{'BTC': 10000}, {'ETH': 10000}, {'XRP': 10000}, {'LTC': 10000}, {'BCH': 10000}, {'EOS': 10000}]
-        response = ResponseApi("GiniWithML", volatilityPercentage, stokes, amountToInvest, datetime.datetime.now())
+        stocks = ["BTC-USD", "ETH-USD", "ADA-USD"]
+        start_date = '2020-01-01'
+        end_date = '2022-08-10'
+
+        gini_df = self.gini(stocks, start_date, end_date)
+        PortfoliosDic = buildReturnGiniPortfoliosDic(amountToInvest, stocks, gini_df)
+        final_invest_portfolio = choosePortfolioByRiskScore(PortfoliosDic, riskScore)
+        response = ResponseApi("Gini", final_invest_portfolio, amountToInvest, datetime.datetime.now())
         return jsonify(response.__str__())
-        # return jsonify()
