@@ -1,5 +1,5 @@
 run: ## run the app
-	LC_ALL=en_US.utf-8 LANG=en_US.utf-8 FLASK_ENV=production FLASK_APP=app flask run
+	LC_ALL=en_US.utf-8 LANG=en_US.utf-8 FLASK_ENV=production FLASK_APP=app.py flask run
 
 test:  ## run tests locally
 	pytest
