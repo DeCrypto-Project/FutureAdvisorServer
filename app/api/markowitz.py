@@ -1,9 +1,9 @@
 from flask import jsonify
 from flask_apispec import MethodResource, marshal_with, use_kwargs
 from flask_restful import Resource
-from server.api.myResponses import InputSchema
-from server.util.apiUtil import choosePortfolioByRiskScore,buildReturnMarkowitzPortfoliosDic
-from server.dto.responseApi import ResponseApi
+from app.api.myResponses import InputSchema
+from app.util.apiUtil import choosePortfolioByRiskScore,buildReturnMarkowitzPortfoliosDic
+from app.dto.responseApi import ResponseApi
 import yfinance as yf
 import numpy as np
 import pandas as pd

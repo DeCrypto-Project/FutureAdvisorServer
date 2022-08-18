@@ -1,13 +1,13 @@
 from flask import jsonify
 from flask_apispec import marshal_with, MethodResource, use_kwargs
 from flask_restful import Resource
-from server.api.myResponses import InputSchemaTwitter
+from app.api.myResponses import InputSchemaTwitter
 import json
 from twython import Twython
 import pandas as pd
 import nltk
 
-from server.dto.responseApiTwitter import ResponseApiTwitter
+from app.dto.responseApiTwitter import ResponseApiTwitter
 
 
 class TwitterStocks(MethodResource, Resource):

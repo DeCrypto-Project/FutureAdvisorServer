@@ -6,16 +6,16 @@ from apispec.ext.marshmallow import MarshmallowPlugin
 from flask_apispec import FlaskApiSpec
 from flask_cors import CORS
 
-from server.api.gini import Gini
-from server.api.giniWithML import GiniWithML
-from server.api.markowitz import Markowitz
-from server.api.twitter_stocks import TwitterStocks
+from app.api.gini import Gini
+from app.api.giniWithML import GiniWithML
+from app.api.markowitz import Markowitz
+from app.api.twitter_stocks import TwitterStocks
 
 app = Flask(__name__)
 CORS(app)
 app.config['SECRET_KEY'] = 'secret-key-goes-here'
 app.config[
-    'PROPAGATE_EXCEPTIONS'] = True  # To allow flask propagating exception even if debug is set to false on server
+    'PROPAGATE_EXCEPTIONS'] = True  # To allow flask propagating exception even if debug is set to false on app
 api = flask_restful.Api(app)
 app.config.update({
     'APISPEC_SPEC': APISpec(
