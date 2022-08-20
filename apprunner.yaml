@@ -9,6 +9,9 @@ build:
         value: "app/app.py"
 run: 
   command: FLASK_APP=app/app.py flask run
+    network: 
+    port: 8000
+    env: 5000
      
 
 
