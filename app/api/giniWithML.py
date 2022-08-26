@@ -2,12 +2,10 @@ from flask import jsonify
 from flask_apispec import MethodResource, marshal_with, use_kwargs
 from flask_restful import Resource
 from app.api.myResponses import InputSchema
-import matplotlib.pyplot as plt
 
 from app.util.apiUtil import choosePortfolioByRiskScore, buildReturnGiniPortfoliosDic
 from app.dto.responseApi import ResponseApi
 
-#plt.switch_backend('Agg')
 import yfinance as yf
 import math
 import numpy as np
@@ -105,63 +103,6 @@ class GiniWithML(MethodResource, Resource):
         df = df[column_order]
         return df
 
-    def plot(self, df, selected):
-        # plot frontier, max sharpe & min Gini values with a scatterplot
-        # find min Gini & max sharpe values in the dataframe (df)
-        min_gini = df['Gini'].min()
-        max_sharpe = df['Sharpe Ratio'].max()
-        max_profolio_annual = df['Profolio_annual'].max()
-        max_gini = df['Gini'].max()
-
-        # use the min, max values to locate and create the two special portfolios
-        sharpe_portfolio = df.loc[df['Sharpe Ratio'] == max_sharpe]
-        min_variance_port = df.loc[df['Gini'] == min_gini]
-        max_profolios_annual = df.loc[df['Profolio_annual'] == max_profolio_annual]
-        max_ginis = df.loc[df['Gini'] == max_gini]
-
-        # plot frontier, max sharpe & min Gini values with a scatterplot
-        plt.style.use('seaborn-dark')
-        df.plot.scatter(x='Gini', y='Profolio_annual', c='Sharpe Ratio',
-                        cmap='RdYlGn', edgecolors='black', figsize=(10, 8), grid=True)
-        plt.scatter(x=sharpe_portfolio['Gini'], y=sharpe_portfolio['Profolio_annual'], c='green', marker='D', s=200)
-        plt.scatter(x=min_variance_port['Gini'], y=min_variance_port['Profolio_annual'], c='orange', marker='D', s=200)
-        plt.scatter(x=max_ginis['Gini'], y=max_profolios_annual['Profolio_annual'], c='red', marker='D', s=200)
-        plt.style.use('seaborn-dark')
-
-        plt.xlabel('Gini (Std. Deviation) Percentage %')
-        plt.ylabel('Expected profolio annual Percentage %')
-        plt.title('Efficient Frontier')
-        plt.subplots_adjust(bottom=0.4)
-
-        # ------------------ Pritning 3 optimal Protfolios -----------------------
-        # Setting max_X, max_Y to act as relative border for window size
-
-        red_num = df.index[df["Profolio_annual"] == max_profolio_annual]
-        yellow_num = df.index[df['Gini'] == min_gini]
-        green_num = df.index[df['Sharpe Ratio'] == max_sharpe]
-        multseries = pd.Series([1, 1, 1] + [100 for stock in selected],
-                               index=['Profolio_annual', 'Gini', 'Sharpe Ratio'] + [stock + ' Weight' for stock in
-                                                                                    selected])
-
-        with pd.option_context('display.float_format', '%{:,.2f}'.format):
-            plt.figtext(0.2, 0.15,
-                        "Max Porfolio: \n" + df.loc[red_num[0]].multiply(multseries).to_string(),
-                        bbox=dict(facecolor='red', alpha=0.5), fontsize=11, style='oblique', ha='center', va='center',
-                        wrap=True)
-            plt.figtext(0.45, 0.15, "Safest Portfolio: \n" + df.loc[yellow_num[0]].multiply(multseries).to_string(),
-                        bbox=dict(facecolor='yellow', alpha=0.5), fontsize=11, style='oblique', ha='center',
-                        va='center', wrap=True)
-            plt.figtext(0.7, 0.15, "Sharpe  Portfolio: \n" + df.loc[green_num[0]].multiply(multseries).to_string(),
-                        bbox=dict(facecolor='green', alpha=0.5), fontsize=11, style='oblique', ha='center', va='center',
-                        wrap=True)
-
-        plt.savefig("plot_gini_with_ml.png")
-        return self.buildReturnDic(selected, max_profolios_annual, min_variance_port, sharpe_portfolio)
-
-        # max_portfolio = df.loc[red_num[0]].multiply(multseries)
-        # safe_portfolio = df.loc[yellow_num[0]].multiply(multseries)
-        # sharpe_portfolio = df.loc[green_num[0]].multiply(multseries)
-        #self.build_response(max_portfolio, safe_portfolio, sharpe_portfolio)
 
     def analyzeMechainLearningFunc(self, profolio_return, table_index):
         df_final = pd.DataFrame({})

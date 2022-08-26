@@ -5,12 +5,10 @@ from flask_apispec import MethodResource, marshal_with, use_kwargs
 from flask_restful import Resource
 
 from app.api.myResponses import InputSchema
-import matplotlib.pyplot as plt
 
 from app.util.apiUtil import choosePortfolioByRiskScore, buildReturnGiniPortfoliosDic
 from app.dto.responseApi import ResponseApi
 
-plt.switch_backend('Agg')
 import yfinance as yf
 import pandas as pd
 import numpy as np
